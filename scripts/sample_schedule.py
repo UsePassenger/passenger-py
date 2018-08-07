@@ -13,14 +13,6 @@ from passenger.simulate.schedule import ScheduleGenerator
 cdir = os.path.dirname(os.path.realpath(__file__))
 
 
-class Sampler(object):
-	def __init__(self, railroad):
-		self.railroad = railroad
-
-	def generate_schedule(self, n_trains):
-		pass
-
-
 def run(options):
 	print(json.dumps(options.__dict__))
 
