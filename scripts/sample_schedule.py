@@ -7,6 +7,7 @@ import numpy as np
 
 from passenger.simulate.osm import read_csv, OSMPoints
 from passenger.simulate.track import TrackGenerator
+from passenger.simulate.schedule import ScheduleGenerator
 
 
 cdir = os.path.dirname(os.path.realpath(__file__))
@@ -51,8 +52,11 @@ def run(options):
 	osmp.write('example-names.png', path=path, names=pathnames)
 
 	# Generate Schedule
-	# TODO
+	sg = ScheduleGenerator(path, ntrains=2)
+	schedule = sg.generate()
 
+	for row in schedule:
+		print(row[0], row[1], ScheduleGenerator.format_time(row[2]))
 
 
 if __name__ == '__main__':
