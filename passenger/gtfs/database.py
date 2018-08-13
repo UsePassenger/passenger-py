@@ -26,7 +26,7 @@ def build_database(filenames, database_path):
     #Unix/Mac - 4 initial slashes in total
     engine = create_engine('sqlite:////absolute/path/to/foo.db')
     """
-    engine = create_engine("sqlite:///{}".format(database_path), echo=True)
+    engine = create_engine("sqlite:///{}".format(database_path))
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -49,7 +49,7 @@ class Database(object):
         super(Database, self).__init__()
         self.database_path = database_path
 
-        engine = create_engine("sqlite:///{}".format(database_path), echo=True)
+        engine = create_engine("sqlite:///{}".format(database_path))
         Session = sessionmaker(bind=engine)
         self.session = Session()
 

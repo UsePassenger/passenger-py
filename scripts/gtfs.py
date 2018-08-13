@@ -8,7 +8,9 @@ import passenger.gtfs.database as database
 import passenger.gtfs.views as views
 import passenger.utils.date as date
 import passenger.utils.fs as fs
+from passenger.utils.timer import Timer
 
+from tqdm import tqdm
 import pandas as pd
 
 
@@ -44,6 +46,40 @@ def query(options):
     print(view)
 
 
+def speedtest(options):
+    server_path = options.server_path
+    db_path = os.path.join(server_path, 'gtfs.db')
+
+    db = database.Database(db_path)
+
+    dt = datetime.datetime.strptime('2018-01-01', '%Y-%m-%d')
+    timedelta = datetime.timedelta(1)
+
+    queries = [
+        ('1', '74', dt),
+    ]
+
+    n = 300
+
+    with Timer() as t:
+        for start, end, dt in tqdm(queries):
+            for i in tqdm(range(n)):
+                dt = dt + timedelta * i
+
+                daystamp = date.daystamp(dt)
+
+                service_ids = db.service_ids_include(daystamp, options.use_calendar, options.use_calendar_dates)
+                rows = db.query_stop_times(options.start, options.end, service_ids=service_ids)
+                rows = list(rows)
+
+                assert len(rows) > 0
+
+    interval = t.interval
+    one = interval / n
+
+    print('N={} {} (N=1 {})'.format(n, interval, one))
+
+
 def init_boolean_flags(options):
     flags_to_add = {}
 
@@ -68,7 +104,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Mode Selection
-    parser.add_argument('--mode', default='build', choices=('build', 'query'))
+    parser.add_argument('--mode', default='build', choices=('build', 'query', 'speedtest'))
 
     # File Paths
     parser.add_argument('--gtfs_path', default=os.path.expanduser('~/data/passenger/mnr/latest'), type=str)
@@ -91,3 +127,5 @@ if __name__ == '__main__':
         build(options)
     elif options.mode == 'query':
         query(options)
+    elif options.mode == 'speedtest':
+        speedtest(options)
