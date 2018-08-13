@@ -19,9 +19,6 @@ def build(options):
     server_path = options.server_path
     db_path = os.path.join(server_path, 'gtfs.db')
 
-    if os.path.exists(db_path):
-        raise FileExistsError('The database file already exists. Please delete it if desired.')
-
     fns = FileReader(gtfs_path).read()
 
     database.build_database(fns, db_path)

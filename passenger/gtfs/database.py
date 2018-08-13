@@ -21,12 +21,38 @@ tables = [
 def all_strings(d):
     return dict([(k, str(v)) for k, v in d.items()])
 
+
+def get_url():
+    username = 'passenger'
+    password = 'passenger'
+    host = 'localhost'
+    dbname = 'passenger'
+
+    url = "mysql+pymysql://{username}:{password}@{host}/{dbname}".format(
+      username=username,
+      password=password,
+      host=host,
+      dbname=dbname)
+
+    return url
+
+
 def build_database(filenames, database_path):
     """
     #Unix/Mac - 4 initial slashes in total
     engine = create_engine('sqlite:////absolute/path/to/foo.db')
+
+    # mysql instructions
+
+    Initialize database:
+
+      CREATE USER 'passenger'@'localhost' IDENTIFIED BY 'passenger';
+      GRANT ALL PRIVILEGES ON *.* TO 'passenger'@'localhost';
+      CREATE DATABASE passenger;
     """
-    engine = create_engine("sqlite:///{}".format(database_path))
+    url = get_url()
+
+    engine = create_engine(url)
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -48,8 +74,7 @@ class Database(object):
     def __init__(self, database_path):
         super(Database, self).__init__()
         self.database_path = database_path
-
-        engine = create_engine("sqlite:///{}".format(database_path))
+        engine = create_engine(get_url())
         Session = sessionmaker(bind=engine)
         self.session = Session()
 
@@ -127,7 +152,9 @@ class Database(object):
           start_stop_times.*,
           end_stop_times.*
         FROM
-          trips as start_trips, trips as end_trips
+          trips as start_trips
+        JOIN
+          trips as end_trips on start_trips.trip_id = end_trips.trip_id
         JOIN
           stop_times as start_stop_times on start_stop_times.trip_id = start_trips.trip_id
         JOIN
@@ -146,8 +173,8 @@ class Database(object):
 
         if filter_drop_off:
             filter_drop_off_clause = """
-            AND start_stop_times.pickup_type == "0"
-            AND end_stop_times.drop_off_type == "0"
+            AND start_stop_times.pickup_type = "0"
+            AND end_stop_times.drop_off_type = "0"
             """
         else:
             filter_drop_off_clause = ""
