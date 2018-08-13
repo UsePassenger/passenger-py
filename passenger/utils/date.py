@@ -1,6 +1,10 @@
 from datetime import datetime
 
 
+def daystamp(dt):
+    return dt.strftime('%Y%m%d')
+
+
 def get_dayname(daystamp):
     d = datetime.strptime(daystamp, '%Y%m%d')
     day_idx = d.weekday()
