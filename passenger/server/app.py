@@ -30,7 +30,13 @@ def home():
     return jsonify(response)
 
 
-@app.route('/query')
+@app.route('/api')
+def api_home():
+    response = BaseResponse(msg='Hello API!')
+    return jsonify(response)
+
+
+@app.route('/api/query')
 def query():
     departure = request.args.get('departure')
     destination = request.args.get('destination')
@@ -59,27 +65,9 @@ def query():
     return jsonify(response)
 
 
-# def query(options):
-#     server_path = options.server_path
-#     db_path = os.path.join(server_path, 'gtfs.db')
-
-#     db = database.Database(db_path)
-
-#     pd.set_option('display.max_columns', None)
-#     pd.set_option('display.max_rows', None)
-#     service_ids = db.service_ids_include(options.daystamp, options.use_calendar, options.use_calendar_dates)
-#     rows = db.query_stop_times(options.start, options.end, service_ids=service_ids)
-#     rows = list(rows)
-
-#     print('Found {} rows.'.format(len(rows)))
-
-#     view = views.timetable_view(rows)
-#     print(view)
-
-
-def launch(server_path=os.path.expanduser('~/data/passenger-server/mnr')):
+def launch(server_path=os.path.expanduser('~/data/passenger-server/mnr'), host='0.0.0.0', port=5001):
     app.config['server_path'] = server_path
     app.config['use_calendar'] = True
     app.config['use_calendar_dates'] = True
 
-    app.run(debug=True)
+    app.run(debug=True, host=host, port=port)
