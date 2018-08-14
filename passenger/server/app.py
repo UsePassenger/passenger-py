@@ -49,11 +49,9 @@ def query():
     use_calendar_dates = app.config['use_calendar_dates']
     server_path = app.config['server_path']
     db_path = os.path.join(server_path, 'gtfs.db')
-    db = database.Database(db_path)
 
-    service_ids = db.service_ids_include(daystamp, use_calendar, use_calendar_dates)
-    rows = db.query_stop_times(departure, destination, service_ids=service_ids)
-    rows = map(object_mapper, rows)
+    db = database.APIDB(db_path, use_calendar=use_calendar, use_calendar_dates=use_calendar_dates)
+    rows = db.query(departure, destination, daystamp)
 
     response = QueryResponse(
         departure=departure,

@@ -1,4 +1,5 @@
 import json
+from json import JSONEncoder
 
 
 class BaseResponse(object):
