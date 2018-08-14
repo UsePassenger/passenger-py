@@ -20,6 +20,10 @@ app = Flask(__name__)
 app.json_encoder = ResponseJSONEncoder
 
 
+def object_mapper(o):
+    return {'{:02}_{}'.format(i, k): v for i, (k, v) in enumerate(o.items())}
+
+
 @app.route('/')
 def home():
     response = BaseResponse(msg='Hello World!')
@@ -43,6 +47,7 @@ def query():
 
     service_ids = db.service_ids_include(daystamp, use_calendar, use_calendar_dates)
     rows = db.query_stop_times(departure, destination, service_ids=service_ids)
+    rows = map(object_mapper, rows)
 
     response = QueryResponse(
         departure=departure,
