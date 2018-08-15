@@ -21,15 +21,27 @@ def build(options):
 
     fns = FileReader(gtfs_path).read()
 
-    database.build_database(fns, db_path)
-    db = database.Database(db_path)
+    # TODO: Use config file.
+    url = database.get_url(
+        username=options.username,
+        password=options.password,
+        host=options.host,
+        dbname=options.dbname)
+    database.build_database(fns, db_path, url=url)
+    db = database.Database(db_path, url=url)
 
 
 def query(options):
     server_path = options.server_path
     db_path = os.path.join(server_path, 'gtfs.db')
 
-    db = database.Database(db_path)
+    # TODO: Use config file.
+    url = database.get_url(
+        username=options.username,
+        password=options.password,
+        host=options.host,
+        dbname=options.dbname)
+    db = database.Database(db_path, url=url)
 
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
@@ -106,6 +118,12 @@ if __name__ == '__main__':
     # File Paths
     parser.add_argument('--gtfs_path', default=os.path.expanduser('~/data/passenger/mnr/latest'), type=str)
     parser.add_argument('--server_path', default=os.path.expanduser('~/data/passenger-server/mnr'), type=str)
+
+    # DB Parameters
+    parser.add_argument('--username', default='passenger', type=str)
+    parser.add_argument('--password', default='passenger', type=str)
+    parser.add_argument('--host', default='localhost', type=str)
+    parser.add_argument('--dbname', default='passenger', type=str)
 
     # Query Parameters
     parser.add_argument('--start', default='1', type=str)

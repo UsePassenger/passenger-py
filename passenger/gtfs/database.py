@@ -25,12 +25,7 @@ def all_strings(d):
     return dict([(k, str(v)) for k, v in d.items()])
 
 
-def get_url():
-    username = 'passenger'
-    password = 'passenger'
-    host = 'localhost'
-    dbname = 'passenger'
-
+def get_url(username='passenger', password='passenger', host='localhost', dbname='passenger'):
     url = "mysql+pymysql://{username}:{password}@{host}/{dbname}".format(
       username=username,
       password=password,
@@ -40,7 +35,7 @@ def get_url():
     return url
 
 
-def build_database(filenames, database_path):
+def build_database(filenames, database_path, url=None):
     """
     # mysql instructions
 
@@ -50,8 +45,10 @@ def build_database(filenames, database_path):
       GRANT ALL PRIVILEGES ON *.* TO 'passenger'@'localhost';
       CREATE DATABASE passenger;
     """
-    url = get_url()
+    if url is None:
+        url = get_url()
 
+    print('Connecting to url = {}'.format(url))
     engine = create_engine(url)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -107,8 +104,8 @@ class APIDB(object):
     A more streamlined wrapper for the database
     that is convenient for the API.
     """
-    def __init__(self, db_path, use_calendar=True, use_calendar_dates=True):
-        self.db = Database(db_path)
+    def __init__(self, db_path, use_calendar=True, use_calendar_dates=True, url=None):
+        self.db = Database(db_path, url=url)
         self.use_calendar = use_calendar
         self.use_calendar_dates = use_calendar_dates
 
@@ -166,10 +163,14 @@ class APIDB(object):
         return rows
 
 class Database(object):
-    def __init__(self, database_path):
+    def __init__(self, database_path, url=None):
         super(Database, self).__init__()
+        url = get_url() if url is None else url
         self.database_path = database_path
-        engine = create_engine(get_url())
+
+        print('Connecting to url = {}'.format(url))
+
+        engine = create_engine(url)
         Session = sessionmaker(bind=engine)
         self.session = Session()
 
