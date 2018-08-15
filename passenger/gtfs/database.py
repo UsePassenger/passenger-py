@@ -42,9 +42,6 @@ def get_url():
 
 def build_database(filenames, database_path):
     """
-    #Unix/Mac - 4 initial slashes in total
-    engine = create_engine('sqlite:////absolute/path/to/foo.db')
-
     # mysql instructions
 
     Initialize database:
@@ -61,16 +58,47 @@ def build_database(filenames, database_path):
 
     models.Base.metadata.create_all(engine)
 
+    # For each Model/File
     for t, mdl in tables:
         if t in filenames:
             fn = filenames[t]
-            df = pd.read_csv(fn)
-            keys = df.keys()
-            q = []
-            for i, row in tqdm(df.iterrows()):
-                q.append(mdl(**all_strings(row)))
-            session.add_all(q)
-            session.commit()
+
+            headers = None
+            delim = ','
+            flush_every = 1000
+            dirty = False
+
+            # Read CSV
+            with open(fn) as f:
+                for i, line in tqdm(enumerate(f)):
+                    line = line.strip()
+
+                    # Read Headers
+                    if i == 0:
+                        headers = line.split(delim)
+                        continue
+
+                    # Parse Line
+                    parts = line.split(delim)
+                    row_dict = {k: v for k, v in zip(headers, parts)}
+                    obj = mdl(**row_dict)
+
+                    # Add to DB
+                    session.add(obj)
+
+                    dirty = True
+
+                    # Flush every so often to minimize RAM usage.
+                    if i > 0 and i % flush_every == 0:
+                        session.flush()
+                        session.commit()
+                        dirty = False
+
+            if dirty:
+                session.flush()
+                session.commit()
+                dirty = False
+
     session.close()
 
 
